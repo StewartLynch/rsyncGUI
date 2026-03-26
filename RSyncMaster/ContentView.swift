@@ -22,6 +22,7 @@ struct ContentView: View {
     @State private var destinationPath = ""
     @State private var showConfirmation = false
     @State private var showResults = false
+    @State private var showCommandInfo = false
     @AppStorage("showConsole") private var showConsole: Bool = true
 
     private var canStart: Bool {
@@ -104,6 +105,20 @@ struct ContentView: View {
             }
             .pickerStyle(.segmented)
             .labelsHidden()
+
+            // Info button — shows the rsync command and flag explanations
+            Button {
+                showCommandInfo.toggle()
+            } label: {
+                Image(systemName: "info.circle")
+                    .font(.title3)
+                    .foregroundStyle(showCommandInfo ? Color.accentColor : Color.secondary)
+            }
+            .buttonStyle(.plain)
+            .help("Show the rsync command for the selected operation")
+            .popover(isPresented: $showCommandInfo, arrowEdge: .bottom) {
+                CommandInfoView(operation: operation)
+            }
 
             Spacer()
 
