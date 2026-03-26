@@ -23,6 +23,7 @@ struct ContentView: View {
     @State private var showConfirmation = false
     @State private var showResults = false
     @State private var showCommandInfo = false
+    @State private var flagConfigs: [RSyncOperation: [CommandFlag]] = RSyncOperation.defaultFlagConfigs
     @AppStorage("showConsole") private var showConsole: Bool = true
 
     private var canStart: Bool {
@@ -37,6 +38,12 @@ struct ContentView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 20)
                 .padding(.bottom, 16)
+
+            Divider()
+
+            flagsSection
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
 
             Divider()
 
@@ -90,6 +97,44 @@ struct ContentView: View {
         }
     }
 
+    // MARK: - Flags Section
+
+    private var flagsSection: some View {
+        HStack(alignment: .center, spacing: 0) {
+            Text("Options:")
+                .fontWeight(.semibold)
+                .frame(width: 72, alignment: .leading)
+
+            HStack(spacing: 14) {
+                ForEach(flagConfigs[operation]?.filter { !$0.isHidden } ?? []) { flag in
+                    if let idx = flagConfigs[operation]?.firstIndex(where: { $0.id == flag.id }) {
+                        Toggle(isOn: Binding(
+                            get:  { flagConfigs[operation]?[idx].isEnabled ?? true },
+                            set:  { flagConfigs[operation]?[idx].isEnabled = $0 }
+                        )) {
+                            HStack(spacing: 3) {
+                                Text(flag.token)
+                                    .font(.system(.caption, design: .monospaced))
+                                if flag.isRequired {
+                                    Image(systemName: "lock.fill")
+                                        .font(.system(size: 7))
+                                        .foregroundStyle(.tertiary)
+                                }
+                            }
+                        }
+                        .toggleStyle(.checkbox)
+                        .disabled(flag.isRequired || manager.isRunning)
+                        .help(flag.isRequired
+                              ? "Required — \(flag.explanation)"
+                              : flag.explanation)
+                    }
+                }
+            }
+
+            Spacer()
+        }
+    }
+
     // MARK: - Operation Picker
 
     private var operationPicker: some View {
@@ -117,7 +162,10 @@ struct ContentView: View {
             .buttonStyle(.plain)
             .help("Show the rsync command for the selected operation")
             .popover(isPresented: $showCommandInfo, arrowEdge: .bottom) {
-                CommandInfoView(operation: operation)
+                CommandInfoView(
+                    operation: operation,
+                    flags: flagConfigs[operation] ?? []
+                )
             }
 
             Spacer()
@@ -396,7 +444,8 @@ struct ContentView: View {
             await manager.run(
                 operation: operation,
                 source: sourcePath,
-                destination: destinationPath
+                destination: destinationPath,
+                flags: flagConfigs[operation] ?? operation.defaultFlags
             )
         }
     }

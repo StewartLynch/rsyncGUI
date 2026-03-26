@@ -17,6 +17,9 @@ import SwiftUI
 
 struct CommandInfoView: View {
     let operation: RSyncOperation
+    /// Live flag state — passed from ContentView so the command updates
+    /// as the user checks / unchecks options.
+    let flags: [CommandFlag]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -36,7 +39,7 @@ struct CommandInfoView: View {
 
             Divider()
 
-            // ── Full command ──────────────────────────────────────────────
+            // ── Live command ──────────────────────────────────────────────
             VStack(alignment: .leading, spacing: 6) {
                 Text("Command")
                     .font(.caption)
@@ -44,7 +47,7 @@ struct CommandInfoView: View {
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
 
-                Text(operation.commandInfo.command)
+                Text(operation.buildDisplayCommand(from: flags))
                     .font(.system(.callout, design: .monospaced))
                     .foregroundStyle(.primary)
                     .padding(12)
@@ -56,6 +59,7 @@ struct CommandInfoView: View {
                             .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
                     )
                     .textSelection(.enabled)
+                    .animation(.easeInOut(duration: 0.2), value: operation.buildDisplayCommand(from: flags))
             }
             .padding(.horizontal, 20)
             .padding(.top, 14)
@@ -72,49 +76,79 @@ struct CommandInfoView: View {
                     .textCase(.uppercase)
                     .padding(.bottom, 4)
 
-                ForEach(operation.commandInfo.tokens) { token in
-                    TokenRow(token: token)
+                ForEach(flags) { flag in
+                    TokenRow(flag: flag)
                 }
             }
             .padding(.horizontal, 20)
             .padding(.top, 14)
             .padding(.bottom, 20)
         }
-        .frame(width: 460)
+        .frame(width: 480)
     }
 }
 
 // MARK: - Token Row
 
 private struct TokenRow: View {
-    let token: CommandToken
+    let flag: CommandFlag
+
+    /// Disabled non-required flags are dimmed and struck through to show
+    /// they have been removed from the active command.
+    private var isDisabledByUser: Bool {
+        !flag.isHidden && !flag.isRequired && !flag.isEnabled
+    }
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            Text(token.token)
-                .font(.system(.caption, design: .monospaced))
-                .fontWeight(.semibold)
-                .foregroundStyle(.tint)
-                .padding(.horizontal, 7)
-                .padding(.vertical, 4)
-                .background(Color.accentColor.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 5))
-                .frame(minWidth: 90, alignment: .leading)
-                // Fixed width so all explanations align regardless of token length
-                .fixedSize()
+            // Badge
+            HStack(spacing: 4) {
+                Text(flag.token)
+                    .font(.system(.caption, design: .monospaced))
+                    .fontWeight(.semibold)
+                    .strikethrough(isDisabledByUser)
+                if flag.isRequired && !flag.isHidden {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 7))
+                }
+            }
+            .foregroundStyle(isDisabledByUser ? Color.secondary : Color.accentColor)
+            .padding(.horizontal, 7)
+            .padding(.vertical, 4)
+            .background(
+                isDisabledByUser
+                    ? Color.secondary.opacity(0.08)
+                    : Color.accentColor.opacity(0.10)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 5))
+            .frame(minWidth: 96, alignment: .leading)
+            .fixedSize()
 
-            Text(token.explanation)
-                .font(.callout)
-                .foregroundStyle(.primary)
-                .fixedSize(horizontal: false, vertical: true)
+            // Explanation
+            VStack(alignment: .leading, spacing: 2) {
+                Text(flag.explanation)
+                    .font(.callout)
+                    .foregroundStyle(isDisabledByUser ? Color.secondary : Color.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if isDisabledByUser {
+                    Text("Disabled — not included in the command")
+                        .font(.caption2)
+                        .foregroundStyle(.orange)
+                }
+            }
         }
         .padding(.vertical, 3)
+        .animation(.easeInOut(duration: 0.2), value: isDisabledByUser)
     }
 }
 
 // MARK: - Preview
 
 #Preview {
-    CommandInfoView(operation: .copy)
-        .padding()
+    CommandInfoView(
+        operation: .copy,
+        flags: RSyncOperation.copy.defaultFlags
+    )
+    .padding()
 }

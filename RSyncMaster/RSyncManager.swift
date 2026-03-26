@@ -44,9 +44,16 @@ final class RSyncManager {
 
     // MARK: - Public API
 
-    func run(operation: RSyncOperation, source: String, destination: String) async {
+    func run(
+        operation: RSyncOperation,
+        source: String,
+        destination: String,
+        flags: [CommandFlag]
+    ) async {
         reset()
         state = .running
+
+        let flagArgs = operation.activeArgFlags(from: flags)
 
         switch operation {
 
@@ -54,16 +61,14 @@ final class RSyncManager {
             // No trailing slash on source → rsync recreates the named folder inside
             // the destination. --delete removes stale files already in dest/FolderName/.
             await executeRSync(
-                arguments: ["-av", "--delete", "--progress",
-                            source.removingTrailingSlash, destination],
+                arguments: flagArgs + [source.removingTrailingSlash, destination],
                 operation: operation
             )
 
         case .move:
             // Same as copy + remove source files after transfer.
             await executeRSync(
-                arguments: ["-av", "--delete", "--progress", "--remove-source-files",
-                            source.removingTrailingSlash, destination],
+                arguments: flagArgs + [source.removingTrailingSlash, destination],
                 operation: operation
             )
 
@@ -71,20 +76,18 @@ final class RSyncManager {
             // Trailing slash on BOTH paths: rsync syncs the *contents* of source
             // directly into destination, making them exact mirrors of each other.
             await executeRSync(
-                arguments: ["-av", "--delete", "--progress",
-                            source.addingTrailingSlash, destination.addingTrailingSlash],
+                arguments: flagArgs + [source.addingTrailingSlash, destination.addingTrailingSlash],
                 operation: operation
             )
 
         case .compare:
             await executeRSync(
-                arguments: ["-avn", "--itemize-changes",
-                            source.removingTrailingSlash, destination],
+                arguments: flagArgs + [source.removingTrailingSlash, destination],
                 operation: operation
             )
 
         case .delete:
-            await executeDelete(path: source.removingTrailingSlash)
+            await executeDelete(path: source.removingTrailingSlash, flags: flagArgs)
         }
     }
 
@@ -202,12 +205,13 @@ final class RSyncManager {
 
     // MARK: - Delete Execution
 
-    private func executeDelete(path: String) async {
-        append("$ /bin/rm -rfv \"\(path)\"", force: true)
+    private func executeDelete(path: String, flags: [String]) async {
+        let displayArgs = (flags + ["\"\(path)\""]).joined(separator: " ")
+        append("$ /bin/rm \(displayArgs)", force: true)
 
         let proc = Process()
         proc.executableURL = URL(fileURLWithPath: "/bin/rm")
-        proc.arguments = ["-rfv", path]
+        proc.arguments = flags + [path]
 
         let outPipe = Pipe()
         let errPipe = Pipe()
