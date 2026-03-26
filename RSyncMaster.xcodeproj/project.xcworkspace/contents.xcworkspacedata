@@ -4,4 +4,10 @@
    <FileRef
       location = "self:">
    </FileRef>
+   <FileRef
+      location = "group:AGENTS.md">
+   </FileRef>
+   <FileRef
+      location = "group:Journal.md">
+   </FileRef>
 </Workspace>

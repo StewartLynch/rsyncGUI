@@ -13,7 +13,6 @@
 //----------------------------------------------
 // Copyright © 2026 CreaTECH Solutions (Stewart Lynch). All rights reserved.
 
-
 import SwiftUI
 
 @main
@@ -22,5 +21,7 @@ struct RSyncMasterApp: App {
         WindowGroup {
             ContentView()
         }
+        .windowResizability(.contentMinSize)
+        .defaultSize(width: 780, height: 680)
     }
 }

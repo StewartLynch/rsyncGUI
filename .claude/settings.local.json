@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sed -i '' 's/ENABLE_APP_SANDBOX = YES/ENABLE_APP_SANDBOX = NO/g' RSyncMaster.xcodeproj/project.pbxproj)",
+      "Bash(sed -i '' 's/ENABLE_USER_SELECTED_FILES = readonly;//g' RSyncMaster.xcodeproj/project.pbxproj)",
+      "Bash(find /Users/slynch/Desktop/RSyncMaster -name package.json -o -name Makefile -o -name Procfile -o -name *.py -o -name docker-compose*)"
+    ]
+  }
+}
