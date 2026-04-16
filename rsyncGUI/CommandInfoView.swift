@@ -16,7 +16,7 @@
 import SwiftUI
 
 struct CommandInfoView: View {
-    let operation: RSyncOperation
+    let operation: rsyncOperation
     /// Live flag state — passed from ContentView so the command updates
     /// as the user checks / unchecks options.
     let flags: [CommandFlag]
@@ -148,7 +148,7 @@ private struct TokenRow: View {
 #Preview {
     CommandInfoView(
         operation: .copy,
-        flags: RSyncOperation.copy.defaultFlags
+        flags: rsyncOperation.copy.defaultFlags
     )
     .padding()
 }

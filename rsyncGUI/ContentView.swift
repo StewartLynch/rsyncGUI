@@ -16,14 +16,14 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var manager = RSyncManager()
-    @State private var operation: RSyncOperation = .copy
+    @State private var manager = rsyncManager()
+    @State private var operation: rsyncOperation = .copy
     @State private var sourcePath = ""
     @State private var destinationPath = ""
     @State private var showConfirmation = false
     @State private var showResults = false
     @State private var showCommandInfo = false
-    @State private var flagConfigs: [RSyncOperation: [CommandFlag]] = RSyncOperation.defaultFlagConfigs
+    @State private var flagConfigs: [rsyncOperation: [CommandFlag]] = rsyncOperation.defaultFlagConfigs
     @AppStorage("showConsole") private var showConsole: Bool = true
 
     private var canStart: Bool {
@@ -157,7 +157,7 @@ struct ContentView: View {
                 .fontWeight(.semibold)
 
             Picker("Operation", selection: $operation) {
-                ForEach(RSyncOperation.allCases) { op in
+                ForEach(rsyncOperation.allCases) { op in
                     Label(op.rawValue, systemImage: op.systemImage)
                         .tag(op)
                 }

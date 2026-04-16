@@ -4,6 +4,14 @@ A native macOS GUI front-end for `rsync` (and `rm`), built entirely with SwiftUI
 
 ---
 
+## Download
+
+Download the latest signed installer DMG from the [GitHub Releases page](https://github.com/StewartLynch/rsyncGUI/releases/latest).
+
+Look for the release asset named **`rsyncGUI.Install.dmg`**.
+
+---
+
 ## Features
 
 ### Five Operations
@@ -29,9 +37,8 @@ Press the **ⓘ** button beside the operation picker to open an inline popover s
 
 ### Path Input
 
-Each path field supports three input methods:
+Each path field supports two input methods:
 
-- **Type** a path directly.
 - **Drag & drop** a file or folder from Finder onto the field. Dropping replaces the entire current path rather than appending text into the field.
 - **Browse** using an `NSOpenPanel` file picker (the folder icon button).
 
@@ -108,9 +115,8 @@ The **Options** row beneath the picker shows checkboxes for every flag belonging
 
 ### 3 — Enter Paths
 
-- **Type** a path directly into the Source or Destination field.
 - **Drag** a file or folder from Finder and drop it on either field; the drop replaces the whole path.
-- Click the **…** icon button to browse with an Open Panel.
+- Click the folder button to browse with an Open Panel.
 
 > For **Sync**, both fields must be folder paths and should have matching names. rsyncGUI warns you if they differ.
 > For **Destination / Sync Target**, Finder packages such as `.app` bundles do not count as folders.
@@ -140,14 +146,14 @@ rsyncGUI/
 ├── rsyncGUIApp.swift             App entry point (WindowGroup → ContentView)
 ├── ContentView.swift             Main window — layout and UI state coordination
 │                                 Holds the per-operation CommandFlag dictionary
-├── PathInputView.swift           Reusable path input (type / browse / drag-drop)
-├── RSyncOperation.swift          Enum of all 5 operations
+├── PathInputView.swift           Reusable path input (browse / drag-drop)
+├── rsyncOperation.swift          Enum of all 5 operations
 │                                   · defaultFlags       — ordered CommandFlag array
 │                                   · buildDisplayCommand — assembles the live command string
 │                                   · activeArgFlags     — args to pass to Process
 │                                   · defaultFlagConfigs — dictionary initialiser
 ├── CommandInfoView.swift         ⓘ Popover — live command box + annotated flag table
-├── RSyncManager.swift            @Observable process manager
+├── rsyncManager.swift            @Observable process manager
 │                                   · Launches rsync / rm via Process
 │                                   · Bridges FileHandle → AsyncStream<String>
 │                                   · Consumes stdout + stderr concurrently (withTaskGroup)
@@ -165,7 +171,7 @@ rsyncGUI/
 
 **`withTaskGroup`** — stdout and stderr are drained concurrently in a single task group, so a stalled stderr pipe never prevents stdout from updating the progress bar, and vice versa.
 
-**Per-operation `CommandFlag` arrays** — flags are value-type `struct` instances stored in a `[RSyncOperation: [CommandFlag]]` dictionary in `ContentView`. Each operation's flag state is completely independent. `buildDisplayCommand(from:)` assembles the display string from the live array so the popover always matches what will actually run.
+**Per-operation `CommandFlag` arrays** — flags are value-type `struct` instances stored in a `[rsyncOperation: [CommandFlag]]` dictionary in `ContentView`. Each operation's flag state is completely independent. `buildDisplayCommand(from:)` assembles the display string from the live array so the popover always matches what will actually run.
 
 ---
 

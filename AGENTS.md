@@ -4,13 +4,13 @@
 rsyncGUI is a macOS SwiftUI utility that wraps `rsync` operations in a GUI. It supports copy, move, sync, delete, and compare workflows with in-app output and result summaries.
 
 ## Key Architecture Decisions
-- `RSyncOperation` centralizes operation metadata (labels, symbols, confirmation behavior, and destination semantics).
-- `RSyncManager` is the execution layer for filesystem operations and output handling.
+- `rsyncOperation` centralizes operation metadata (labels, symbols, confirmation behavior, and destination semantics).
+- `rsyncManager` is the execution layer for filesystem operations and output handling.
 - Views are split by concern (`ContentView`, `PathInputView`, result views) to keep UI composition clean and testable.
 
 ## Important Conventions
 - Prefer modern SwiftUI patterns and clear view composition.
-- Keep operation-specific strings/flags in `RSyncOperation` instead of scattering conditionals.
+- Keep operation-specific strings/flags in `rsyncOperation` instead of scattering conditionals.
 - Use Swift naming conventions: PascalCase for types, camelCase for members.
 - Prefer safe optional handling; avoid force unwraps.
 

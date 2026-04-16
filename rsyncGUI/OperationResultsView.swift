@@ -16,7 +16,7 @@
 import SwiftUI
 
 struct OperationResultsView: View {
-    let operation: RSyncOperation
+    let operation: rsyncOperation
     let errors: [String]
     let terminationStatus: Int32
     @Binding var isPresented: Bool

@@ -16,7 +16,7 @@
 import Foundation
 import Observation
 
-enum RSyncState: Equatable {
+enum rsyncState: Equatable {
     case idle
     case running
     case completed
@@ -26,12 +26,12 @@ enum RSyncState: Equatable {
 }
 
 @Observable
-final class RSyncManager {
+final class rsyncManager {
     var consoleOutput: [String] = []
     var progress: Double? = nil
     var totalFiles: Int = 0
     var processedFiles: Int = 0
-    var state: RSyncState = .idle
+    var state: rsyncState = .idle
     var errors: [String] = []
     var compareResults: [CompareResult] = []
     var terminationStatus: Int32 = 0
@@ -46,7 +46,7 @@ final class RSyncManager {
     // MARK: - Public API
 
     func run(
-        operation: RSyncOperation,
+        operation: rsyncOperation,
         source: String,
         destination: String,
         flags: [CommandFlag]
@@ -163,7 +163,7 @@ final class RSyncManager {
 
     // MARK: - rsync Execution
 
-    private func executeRSync(arguments: [String], operation: RSyncOperation) async {
+    private func executeRSync(arguments: [String], operation: rsyncOperation) async {
         let rsyncPath = resolvedRsyncPath()
         append("$ \(([rsyncPath] + arguments).joined(separator: " "))", force: true)
 
@@ -284,7 +284,7 @@ final class RSyncManager {
 
     // MARK: - Output Processing
 
-    private func processOutput(_ line: String, operation: RSyncOperation) {
+    private func processOutput(_ line: String, operation: rsyncOperation) {
         if operation == .compare {
             append(line)
             parseCompareItem(line)

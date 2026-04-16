@@ -10,11 +10,11 @@ Think of it as a cockpit for rsync. All the power, none of the typing.
 
 ## Architecture Deep Dive
 
-The app is structured around one central idea: **the `RSyncManager` knows everything, the views just show it.**
+The app is structured around one central idea: **the `rsyncManager` knows everything, the views just show it.**
 
 ### The Kitchen Analogy
 
-- **`RSyncManager`** = the kitchen. It runs the actual rsync processes, manages output, tracks progress, collects errors. Nobody touches the stove but the kitchen.
+- **`rsyncManager`** = the kitchen. It runs the actual rsync processes, manages output, tracks progress, collects errors. Nobody touches the stove but the kitchen.
 - **`ContentView`** = the dining room. It presents what the kitchen produces. It holds the manager as `@State` and observes it via Swift's `@Observable` macro.
 - **`PathInputView`** = the waiter taking your order — accepts paths three ways (type, drag, browse) and reports them back.
 - **`CompareResultsView` / `OperationResultsView`** = the receipt. Shows you what happened after the kitchen's done.
@@ -30,7 +30,7 @@ Background thread (readabilityHandler)
     ↓ continuation.yield(text)   ← Sendable, thread-safe
 AsyncStream<String>
     ↓ for await chunk in stream  ← runs on @MainActor
-RSyncManager processes output, updates @Observable properties
+rsyncManager processes output, updates @Observable properties
     ↓ SwiftUI observes changes
 Views update automatically
 ```
@@ -45,8 +45,8 @@ The project has `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` set, which means eve
 rsyncGUI/
 ├── rsyncGUIApp.swift           App entry, window size/resizability
 ├── ContentView.swift            Main UI — operation picker, paths, console, action bar
-├── RSyncOperation.swift         Enum: Copy/Move/Delete/Compare + labels/systemImages
-├── RSyncManager.swift           @Observable process manager — the brain
+├── rsyncOperation.swift         Enum: Copy/Move/Delete/Compare + labels/systemImages
+├── rsyncManager.swift           @Observable process manager — the brain
 ├── CompareResult.swift          Model: ChangeType enum + CompareResult struct
 ├── PathInputView.swift          Reusable path input: text field + drag + NSOpenPanel
 ├── CompareResultsView.swift     Table sheet for compare diff results
@@ -95,7 +95,7 @@ rsyncGUI/
 
 Small bug, real impact: the move operation icon referenced `tray.and.arrow.right.fill`, which is not a valid symbol in the system set for this target. That produced a runtime symbol lookup error.
 
-Fix applied in `RSyncOperation.systemImage`:
+Fix applied in `rsyncOperation.systemImage`:
 - Replaced `tray.and.arrow.right.fill` with `arrow.right.square.fill`.
 
 Lesson reinforced: SF Symbol names that look plausible are not guaranteed to exist. Treat symbol IDs like API names and validate them against the actual platform set.
@@ -108,7 +108,7 @@ Lesson reinforced: SF Symbol names that look plausible are not guaranteed to exi
 The `AsyncStream` bridge doesn't mutate state from the background — it just feeds data into a channel. All state mutation happens at the consumption site (main actor). This is the right mental model for async I/O.
 
 **2. `@Observable` is much nicer than `ObservableObject`.**
-With `ObservableObject`, every `@Published` property causes a view re-render even if that property isn't observed. `@Observable` only triggers re-renders when properties you actually *accessed* change. For a class like `RSyncManager` with many properties, this matters.
+With `ObservableObject`, every `@Published` property causes a view re-render even if that property isn't observed. `@Observable` only triggers re-renders when properties you actually *accessed* change. For a class like `rsyncManager` with many properties, this matters.
 
 **3. `withTaskGroup` > `async let` for unknown-count concurrency.**
 `async let` needs the count known at compile time. `withTaskGroup` can add tasks dynamically and waits for all of them.

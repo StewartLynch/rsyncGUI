@@ -29,6 +29,12 @@ struct PathInputView: View {
     @State private var isDropTargeted = false
     @State private var validationMessage: String? = nil
 
+    private var placeholderText: String {
+        allowFiles
+            ? "Drag a file or folder here, or choose one in Finder"
+            : "Drag a folder here, or choose one in Finder"
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 8) {
@@ -37,15 +43,20 @@ struct PathInputView: View {
                     .fontWeight(.medium)
 
                 ZStack {
-                    TextField(
-                        allowFiles ? "Type a path, or drag a file/folder here…" : "Type a folder path, or drag a folder here…",
-                        text: $path
-                    )
-                    .textFieldStyle(.roundedBorder)
-                    .font(.system(.body, design: .monospaced))
-                    .onChange(of: path) { _, _ in
-                        validationMessage = nil
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color(nsColor: .textBackgroundColor))
+
+                    HStack {
+                        Text(path.isEmpty ? placeholderText : path)
+                            .font(.system(.body, design: .monospaced))
+                            .foregroundStyle(path.isEmpty ? .secondary : .primary)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                            .textSelection(.enabled)
+                        Spacer(minLength: 0)
                     }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 8)
 
                     RoundedRectangle(cornerRadius: 6)
                         .fill(Color.clear)
@@ -56,7 +67,7 @@ struct PathInputView: View {
                 }
                 .overlay(
                     RoundedRectangle(cornerRadius: 6)
-                        .stroke(isDropTargeted ? Color.accentColor : Color.clear, lineWidth: 2)
+                        .stroke(isDropTargeted ? Color.accentColor : Color.secondary.opacity(0.25), lineWidth: isDropTargeted ? 2 : 1)
                 )
 
                 Button {
@@ -125,6 +136,7 @@ struct PathInputView: View {
             }
             Task { @MainActor in
                 path = url.path(percentEncoded: false)
+                validationMessage = nil
             }
         }
         return true
@@ -145,6 +157,7 @@ struct PathInputView: View {
 
         if panel.runModal() == .OK, let url = panel.url {
             path = url.path(percentEncoded: false)
+            validationMessage = nil
         }
     }
 

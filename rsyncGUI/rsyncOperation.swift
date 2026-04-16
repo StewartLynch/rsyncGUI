@@ -55,7 +55,7 @@ struct CommandFlag: Identifiable {
 
 // MARK: -
 
-enum RSyncOperation: String, CaseIterable, Identifiable {
+enum rsyncOperation: String, CaseIterable, Identifiable {
     case copy    = "Copy"
     case move    = "Move"
     case sync    = "Sync"
@@ -239,7 +239,7 @@ enum RSyncOperation: String, CaseIterable, Identifiable {
     }
 
     /// A ready-to-use dictionary of default flag configs for all operations.
-    static var defaultFlagConfigs: [RSyncOperation: [CommandFlag]] {
+    static var defaultFlagConfigs: [rsyncOperation: [CommandFlag]] {
         Dictionary(uniqueKeysWithValues: allCases.map { ($0, $0.defaultFlags) })
     }
 
@@ -258,7 +258,7 @@ enum RSyncOperation: String, CaseIterable, Identifiable {
     }
 
     /// The flag strings (non-hidden, enabled) to pass as Process arguments.
-    /// Source and destination are handled separately by RSyncManager.
+    /// Source and destination are handled separately by rsyncManager.
     func activeArgFlags(from flags: [CommandFlag]) -> [String] {
         flags.filter { !$0.isHidden && $0.isEnabled }.map(\.token)
     }

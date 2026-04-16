@@ -5,8 +5,8 @@ A macOS SwiftUI app that provides a GUI frontend for rsync. Supports Copy, Move,
 
 ## Architecture
 
-- **`RSyncManager`** — `@Observable` class (implicitly `@MainActor`). Owns all process lifecycle: launches rsync/rm via `Process`, bridges `FileHandle.readabilityHandler` → `AsyncStream<String>`, updates state/progress/output.
-- **`ContentView`** — Main window. Holds `RSyncManager` as `@State`. Coordinates all UI state.
+- **`rsyncManager`** — `@Observable` class (implicitly `@MainActor`). Owns all process lifecycle: launches rsync/rm via `Process`, bridges `FileHandle.readabilityHandler` → `AsyncStream<String>`, updates state/progress/output.
+- **`ContentView`** — Main window. Holds `rsyncManager` as `@State`. Coordinates all UI state.
 - **`PathInputView`** — Reusable component supporting typed input, NSOpenPanel browse, and drag-and-drop of file URLs.
 - **`CompareResultsView`** — Table view with filter chips showing diff results from `--itemize-changes`.
 - **`OperationResultsView`** — Sheet for Copy/Move/Delete completion + error list.
