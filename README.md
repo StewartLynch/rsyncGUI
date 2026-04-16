@@ -12,12 +12,9 @@ A native macOS GUI front-end for `rsync` (and `rm`), built entirely with SwiftUI
 
 ## Download
 
-Download the latest signed installer DMG from the [GitHub Releases page](https://github.com/StewartLynch/rsyncGUI/releases/latest).
+Grab the latest release from the [Releases page](https://github.com/StewartLynch/rsyncGUI/releases/latest), or download directly:
 
-Look for the release asset named **`rsyncGUI.Install.dmg`**.
-
-Direct download for the current release:
-[Download rsyncGUI.Install.dmg](https://github.com/StewartLynch/rsyncGUI/releases/download/v1.0.0/rsyncGUI.Install.dmg)
+[![Download DMG](https://img.shields.io/badge/Download-DMG-blue?style=for-the-badge)](https://github.com/StewartLynch/rsyncGUI/releases/download/v1.0.0/rsyncGUI.Install.dmg)
 
 ---
 
