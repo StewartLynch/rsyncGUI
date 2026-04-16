@@ -20,6 +20,7 @@ enum RSyncState: Equatable {
     case idle
     case running
     case completed
+    case completedWithWarnings
     case cancelled
     case failed
 }
@@ -97,6 +98,11 @@ final class RSyncManager {
         append("⚠️ Operation cancelled by user.")
     }
 
+    func clear() {
+        reset()
+        state = .idle
+    }
+
     // MARK: - Private Helpers
 
     private func reset() {
@@ -118,16 +124,30 @@ final class RSyncManager {
         consoleOutput.append(line)
     }
 
-    /// Bridges a FileHandle's readability events into an AsyncStream.
-    /// The continuation is Sendable so the background handler can yield safely.
+    /// Bridges a FileHandle's readability events into an AsyncStream of complete
+    /// logical lines, buffering partial reads until a newline arrives.
     private func makeStream(from handle: FileHandle) -> AsyncStream<String> {
         AsyncStream { continuation in
+            var pending = ""
             handle.readabilityHandler = { h in
                 let data = h.availableData
                 if data.isEmpty {
+                    if !pending.isEmpty {
+                        continuation.yield(pending)
+                        pending = ""
+                    }
                     continuation.finish()
                 } else if let text = String(data: data, encoding: .utf8) {
-                    continuation.yield(text)
+                    pending += text.replacingOccurrences(of: "\r", with: "\n")
+
+                    let parts = pending.components(separatedBy: "\n")
+                    if let trailing = parts.last {
+                        pending = trailing
+                    }
+
+                    for line in parts.dropLast() where !line.isEmpty {
+                        continuation.yield(line)
+                    }
                 }
             }
             continuation.onTermination = { _ in
@@ -173,13 +193,13 @@ final class RSyncManager {
         // Each `await` in the for-loops yields the actor cooperatively.
         await withTaskGroup(of: Void.self) { group in
             group.addTask { @MainActor in
-                for await chunk in outStream {
-                    self.processOutput(chunk, operation: operation)
+                for await line in outStream {
+                    self.processOutput(line, operation: operation)
                 }
             }
             group.addTask { @MainActor in
-                for await chunk in errStream {
-                    self.processError(chunk)
+                for await line in errStream {
+                    self.processError(line)
                 }
             }
         }
@@ -190,16 +210,19 @@ final class RSyncManager {
         terminationStatus = proc.terminationStatus
 
         guard state == .running else { return }
-        progress = 1.0
-        state = .completed
 
         switch terminationStatus {
         case 0:
+            progress = 1.0
+            state = .completed
             append("✅ Operation completed successfully.", force: true)
         case 23, 24:
+            progress = 1.0
+            state = .completedWithWarnings
             append("⚠️ Completed with warnings — some files may not have transferred.", force: true)
         default:
-            append("⚠️ Completed with exit code \(terminationStatus).", force: true)
+            state = .failed
+            append("❌ Operation failed with exit code \(terminationStatus).", force: true)
         }
     }
 
@@ -233,13 +256,13 @@ final class RSyncManager {
 
         await withTaskGroup(of: Void.self) { group in
             group.addTask { @MainActor in
-                for await chunk in outStream {
-                    for line in chunk.rsyncLines { self.append(line) }
+                for await line in outStream {
+                    self.append(line)
                 }
             }
             group.addTask { @MainActor in
-                for await chunk in errStream {
-                    self.processError(chunk)
+                for await line in errStream {
+                    self.processError(line)
                 }
             }
         }
@@ -248,33 +271,32 @@ final class RSyncManager {
         terminationStatus = proc.terminationStatus
 
         guard state == .running else { return }
-        progress = 1.0
-        state = .completed
-        append(terminationStatus == 0
-            ? "✅ Deletion completed successfully."
-            : "⚠️ Deletion completed with exit code \(terminationStatus).",
-               force: true)
+
+        if terminationStatus == 0 {
+            progress = 1.0
+            state = .completed
+            append("✅ Deletion completed successfully.", force: true)
+        } else {
+            state = .failed
+            append("❌ Deletion failed with exit code \(terminationStatus).", force: true)
+        }
     }
 
     // MARK: - Output Processing
 
-    private func processOutput(_ chunk: String, operation: RSyncOperation) {
-        for line in chunk.rsyncLines {
-            if operation == .compare {
-                append(line)
-                parseCompareItem(line)
-            } else {
-                parseProgress(from: line)
-                append(line)
-            }
+    private func processOutput(_ line: String, operation: RSyncOperation) {
+        if operation == .compare {
+            append(line)
+            parseCompareItem(line)
+        } else {
+            parseProgress(from: line)
+            append(line)
         }
     }
 
-    private func processError(_ chunk: String) {
-        for line in chunk.rsyncLines {
-            errors.append(line)
-            append("❌ \(line)", force: true)   // errors always surface in the console
-        }
+    private func processError(_ line: String) {
+        errors.append(line)
+        append("❌ \(line)", force: true)   // errors always surface in the console
     }
 
     /// Parses the `to-chk=M/T` token from rsync --progress output to update overall progress.
@@ -324,13 +346,6 @@ final class RSyncManager {
 // MARK: - String Helpers
 
 private extension String {
-    /// Splits a chunk of rsync output by newlines and carriage returns, dropping empties.
-    var rsyncLines: [String] {
-        replacingOccurrences(of: "\r", with: "\n")
-            .split(separator: "\n", omittingEmptySubsequences: true)
-            .map(String.init)
-    }
-
     /// Returns the path without a trailing slash (preserves root "/").
     var removingTrailingSlash: String {
         guard hasSuffix("/"), count > 1 else { return self }

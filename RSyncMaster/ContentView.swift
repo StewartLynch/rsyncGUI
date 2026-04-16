@@ -27,9 +27,20 @@ struct ContentView: View {
     @AppStorage("showConsole") private var showConsole: Bool = true
 
     private var canStart: Bool {
-        !sourcePath.isEmpty &&
-        (operation == .delete || !destinationPath.isEmpty) &&
-        !manager.isRunning
+        !manager.isRunning &&
+        sourcePathIsValid &&
+        (operation == .delete || destinationPathIsValid)
+    }
+
+    private var canReset: Bool {
+        !manager.isRunning &&
+        (!sourcePath.isEmpty ||
+         !destinationPath.isEmpty ||
+         manager.state != .idle ||
+         !manager.consoleOutput.isEmpty ||
+         manager.progress != nil ||
+         !manager.errors.isEmpty ||
+         !manager.compareResults.isEmpty)
     }
 
     var body: some View {
@@ -85,8 +96,11 @@ struct ContentView: View {
             resultsSheet
         }
         .onChange(of: manager.state) { _, newState in
-            if newState == .completed {
+            switch newState {
+            case .completed, .completedWithWarnings, .failed:
                 showResults = true
+            default:
+                break
             }
         }
         .onChange(of: showConsole) { _, newValue in
@@ -186,6 +200,9 @@ struct ContentView: View {
         case .completed:
             Label("Completed", systemImage: "checkmark.circle.fill")
                 .foregroundStyle(.green)
+        case .completedWithWarnings:
+            Label("Completed With Warnings", systemImage: "exclamationmark.triangle.fill")
+                .foregroundStyle(.orange)
         case .cancelled:
             Label("Cancelled", systemImage: "xmark.circle.fill")
                 .foregroundStyle(.secondary)
@@ -200,6 +217,38 @@ struct ContentView: View {
     /// Last path component of a path string (folder name).
     private func folderName(of path: String) -> String {
         URL(fileURLWithPath: path).lastPathComponent
+    }
+
+    private func pathStatus(_ path: String) -> PathValidationStatus {
+        var isDirectory: ObjCBool = false
+        let exists = FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory)
+        guard exists else {
+            return PathValidationStatus(exists: false, isDirectory: false)
+        }
+
+        let url = URL(fileURLWithPath: path)
+        let values = try? url.resourceValues(forKeys: [.isPackageKey])
+        let isPackage = values?.isPackage ?? false
+        return PathValidationStatus(exists: true, isDirectory: isDirectory.boolValue && !isPackage)
+    }
+
+    private var sourcePathIsValid: Bool {
+        guard !sourcePath.isEmpty else { return false }
+        let status = pathStatus(sourcePath)
+        guard status.exists else { return false }
+
+        switch operation {
+        case .sync:
+            return status.isDirectory
+        case .copy, .move, .delete, .compare:
+            return true
+        }
+    }
+
+    private var destinationPathIsValid: Bool {
+        guard !destinationPath.isEmpty else { return false }
+        let status = pathStatus(destinationPath)
+        return status.exists && status.isDirectory
     }
 
     /// True when Sync is active and the two folder names differ.
@@ -380,19 +429,41 @@ struct ContentView: View {
 
     private var actionBar: some View {
         HStack(spacing: 12) {
-            Button {
-                if operation.requiresConfirmation {
-                    showConfirmation = true
-                } else {
-                    startOperation()
-                }
-            } label: {
-                Label(operation.buttonLabel, systemImage: operation.systemImage)
-                    .frame(minWidth: 140)
+            Button("Reset", systemImage: "arrow.counterclockwise") {
+                resetFields()
             }
-            .buttonStyle(.borderedProminent)
-            .disabled(!canStart)
-            .keyboardShortcut("r", modifiers: .command)
+            .buttonStyle(.bordered)
+            .disabled(!canReset)
+
+            Group {
+                if canStart {
+                    Button {
+                        if operation.requiresConfirmation {
+                            showConfirmation = true
+                        } else {
+                            startOperation()
+                        }
+                    } label: {
+                        Label(operation.buttonLabel, systemImage: operation.systemImage)
+                            .frame(minWidth: 140)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .keyboardShortcut("r", modifiers: .command)
+                } else {
+                    Button {
+                        if operation.requiresConfirmation {
+                            showConfirmation = true
+                        } else {
+                            startOperation()
+                        }
+                    } label: {
+                        Label(operation.buttonLabel, systemImage: operation.systemImage)
+                            .frame(minWidth: 140)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(true)
+                }
+            }
 
             Spacer()
 
@@ -450,6 +521,15 @@ struct ContentView: View {
         }
     }
 
+    private func resetFields() {
+        sourcePath = ""
+        destinationPath = ""
+        showConfirmation = false
+        showResults = false
+        showCommandInfo = false
+        manager.clear()
+    }
+
     private func consoleColor(for line: String) -> Color {
         if line.hasPrefix("❌") { return .red }
         if line.hasPrefix("⚠️") { return .orange }
@@ -457,6 +537,11 @@ struct ContentView: View {
         if line.hasPrefix("$") { return .accentColor }
         return .primary
     }
+}
+
+private struct PathValidationStatus {
+    let exists: Bool
+    let isDirectory: Bool
 }
 
 #Preview {

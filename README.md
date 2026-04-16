@@ -1,6 +1,6 @@
 # RSyncMaster
 
-A native macOS GUI front-end for `rsync` (and `rm`), built entirely with SwiftUI and Swift Concurrency. RSyncMaster makes common file operations — copying, moving, syncing, deleting, and comparing directories — accessible through a clean, self-documenting interface without ever opening a Terminal window.
+A native macOS GUI front-end for `rsync` (and `rm`), built entirely with SwiftUI and Swift Concurrency. RSyncMaster makes common file operations — copying, moving, syncing, deleting, and comparing files or folders — accessible through a clean, self-documenting interface without ever opening a Terminal window.
 
 ---
 
@@ -32,10 +32,12 @@ Press the **ⓘ** button beside the operation picker to open an inline popover s
 Each path field supports three input methods:
 
 - **Type** a path directly.
-- **Drag & drop** a file or folder from Finder onto the field.
+- **Drag & drop** a file or folder from Finder onto the field. Dropping replaces the entire current path rather than appending text into the field.
 - **Browse** using an `NSOpenPanel` file picker (the folder icon button).
 
-The **Source** field accepts both files and folders (except for Sync, which requires a folder). The **Destination / Sync Target** field always requires a folder. When Delete is selected, only the Source field is shown.
+The **Source** field accepts both files and folders (except for Sync, which requires a folder). The **Destination / Sync Target** field always requires a real folder. Finder packages such as `.app` bundles are treated as files and are rejected for folder-only targets. When Delete is selected, only the Source field is shown.
+
+The **Start** button stays disabled until the current paths are valid for the selected operation, and a **Reset** button clears the paths, console output, progress, and any current results state.
 
 A warning banner appears automatically when Sync is selected and the two folder names differ — a common sign of a mistaken path that would overwrite the wrong location.
 
@@ -62,7 +64,7 @@ Copy, Move, Sync, and Delete all require confirmation before the operation start
 
 ### Results Views
 
-**Copy / Move / Sync / Delete** — a sheet reports success or lists any errors collected during the run.
+**Copy / Move / Sync / Delete** — a sheet reports success, warnings, or failure details based on the command's exit status and any collected stderr output.
 
 **Compare** — a rich results sheet with:
 - A header showing the total number of differences found (or a "No Differences Found" badge if the folders are identical).
@@ -107,15 +109,16 @@ The **Options** row beneath the picker shows checkboxes for every flag belonging
 ### 3 — Enter Paths
 
 - **Type** a path directly into the Source or Destination field.
-- **Drag** a file or folder from Finder and drop it on either field.
+- **Drag** a file or folder from Finder and drop it on either field; the drop replaces the whole path.
 - Click the **…** icon button to browse with an Open Panel.
 
 > For **Sync**, both fields must be folder paths and should have matching names. RSyncMaster warns you if they differ.
+> For **Destination / Sync Target**, Finder packages such as `.app` bundles do not count as folders.
 > For **Delete**, only the Source field is shown.
 
 ### 4 — Start
 
-Click **Start [Operation]**. A confirmation dialog appears for Copy, Move, Sync, and Delete. Read it, then confirm to proceed.
+Click **Start [Operation]** once the paths validate. A confirmation dialog appears for Copy, Move, Sync, and Delete. Read it, then confirm to proceed. Use **Reset** to clear the current paths and run state.
 
 ### 5 — Monitor Progress
 
@@ -125,7 +128,7 @@ Click **Start [Operation]**. A confirmation dialog appears for Copy, Move, Sync,
 
 ### 6 — Review Results
 
-- After **Copy / Move / Sync / Delete** a results sheet shows success or a list of errors.
+- After **Copy / Move / Sync / Delete** a results sheet shows success, warnings, or errors.
 - After **Compare** a dedicated view opens. Use the filter chips to isolate **New**, **Modified**, **Deleted**, or **Changed** files, or use the search field to find a specific path.
 
 ---

@@ -36,22 +36,28 @@ struct PathInputView: View {
                     .frame(width: 90, alignment: .trailing)
                     .fontWeight(.medium)
 
-                TextField(
-                    allowFiles ? "Type a path, or drag a file/folder here…" : "Type a folder path, or drag a folder here…",
-                    text: $path
-                )
-                .textFieldStyle(.roundedBorder)
-                .font(.system(.body, design: .monospaced))
-                .onDrop(of: [UTType.fileURL], isTargeted: $isDropTargeted) { providers in
-                    handleDrop(providers: providers)
+                ZStack {
+                    TextField(
+                        allowFiles ? "Type a path, or drag a file/folder here…" : "Type a folder path, or drag a folder here…",
+                        text: $path
+                    )
+                    .textFieldStyle(.roundedBorder)
+                    .font(.system(.body, design: .monospaced))
+                    .onChange(of: path) { _, _ in
+                        validationMessage = nil
+                    }
+
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.clear)
+                        .contentShape(RoundedRectangle(cornerRadius: 6))
+                        .onDrop(of: [UTType.fileURL], isTargeted: $isDropTargeted) { providers in
+                            handleDrop(providers: providers)
+                        }
                 }
                 .overlay(
                     RoundedRectangle(cornerRadius: 6)
                         .stroke(isDropTargeted ? Color.accentColor : Color.clear, lineWidth: 2)
                 )
-                .onChange(of: path) { _, _ in
-                    validationMessage = nil
-                }
 
                 Button {
                     openPanel()
@@ -86,14 +92,14 @@ struct PathInputView: View {
 
     @ViewBuilder
     private var pathStatusIcon: some View {
-        let (exists, isDir) = pathStatus(path)
-        if exists {
-            if !allowFiles && !isDir {
+        let status = pathStatus(path)
+        if status.exists {
+            if !allowFiles && !status.isDirectory {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundStyle(.red)
                     .help("Destination must be a folder")
             } else {
-                Image(systemName: isDir ? "folder.fill" : "doc.fill")
+                Image(systemName: status.isDirectory ? "folder.fill" : "doc.fill")
                     .foregroundStyle(.secondary)
             }
         } else {
@@ -109,9 +115,9 @@ struct PathInputView: View {
         guard let provider = providers.first else { return false }
         _ = provider.loadObject(ofClass: URL.self) { url, _ in
             guard let url else { return }
-            let (exists, isDir) = pathStatus(url.path(percentEncoded: false))
-            guard exists else { return }
-            if !allowFiles && !isDir {
+            let status = pathStatus(url.path(percentEncoded: false))
+            guard status.exists else { return }
+            if !allowFiles && !status.isDirectory {
                 Task { @MainActor in
                     validationMessage = "Destination must be a folder."
                 }
@@ -144,9 +150,21 @@ struct PathInputView: View {
 
     // MARK: - Helpers
 
-    private func pathStatus(_ p: String) -> (exists: Bool, isDirectory: Bool) {
+    private func pathStatus(_ p: String) -> PathStatus {
         var isDir: ObjCBool = false
         let exists = FileManager.default.fileExists(atPath: p, isDirectory: &isDir)
-        return (exists, isDir.boolValue)
+        guard exists else {
+            return PathStatus(exists: false, isDirectory: false)
+        }
+
+        let url = URL(fileURLWithPath: p)
+        let values = try? url.resourceValues(forKeys: [.isPackageKey])
+        let isPackage = values?.isPackage ?? false
+        return PathStatus(exists: true, isDirectory: isDir.boolValue && !isPackage)
     }
+}
+
+private struct PathStatus {
+    let exists: Bool
+    let isDirectory: Bool
 }
