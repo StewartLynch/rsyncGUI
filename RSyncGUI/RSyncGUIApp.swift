@@ -1,6 +1,6 @@
 //
 //----------------------------------------------
-// Original project: RSyncGUI
+// Original project: rsyncGUI
 //
 // Follow me on Mastodon: https://iosdev.space/@StewartLynch
 // Follow me on Threads: https://www.threads.net/@stewartlynch
@@ -16,7 +16,7 @@
 import SwiftUI
 
 @main
-struct RSyncGUIApp: App {
+struct rsyncGUIApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()

@@ -1,6 +1,6 @@
 //
 //----------------------------------------------
-// Original project: RSyncGUI
+// Original project: rsyncGUI
 //
 // Follow me on Mastodon: https://iosdev.space/@StewartLynch
 // Follow me on Threads: https://www.threads.net/@stewartlynch
@@ -139,7 +139,7 @@ enum RSyncOperation: String, CaseIterable, Identifiable {
                 .init(token: "--delete",
                       explanation: "Deletes files at the destination that no longer exist in the source, so the destination ends up as an exact match of the source."),
                 .init(token: "--progress",
-                      explanation: "Displays per-file transfer speed and a running file count in the form to-chk=M/T. RSyncGUI uses this token to drive the progress bar — disabling it switches the bar to indeterminate mode."),
+                      explanation: "Displays per-file transfer speed and a running file count in the form to-chk=M/T. rsyncGUI uses this token to drive the progress bar — disabling it switches the bar to indeterminate mode."),
                 .init(token: "<source>",
                       explanation: "The file or folder to copy. No trailing slash, so rsync recreates the named item itself inside the destination folder.",
                       isRequired: true, isHidden: true),
@@ -226,7 +226,7 @@ enum RSyncOperation: String, CaseIterable, Identifiable {
                       explanation: "Dry-run mode. rsync calculates what would be transferred but makes absolutely no changes to disk. This flag must stay on to keep Compare safe.",
                       isRequired: true),
                 .init(token: "--itemize-changes",
-                      explanation: "Outputs an 11-character change code for every file that differs (e.g. >f+++++++++ new.txt). RSyncGUI parses these codes to build the colour-coded results table.",
+                      explanation: "Outputs an 11-character change code for every file that differs (e.g. >f+++++++++ new.txt). rsyncGUI parses these codes to build the colour-coded results table.",
                       isRequired: true),
                 .init(token: "<source>",
                       explanation: "The reference folder whose contents are compared against the destination.",

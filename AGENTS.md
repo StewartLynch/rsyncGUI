@@ -1,7 +1,7 @@
-# RSyncGUI Agent Notes
+# rsyncGUI Agent Notes
 
 ## Project Overview
-RSyncGUI is a macOS SwiftUI utility that wraps `rsync` operations in a GUI. It supports copy, move, sync, delete, and compare workflows with in-app output and result summaries.
+rsyncGUI is a macOS SwiftUI utility that wraps `rsync` operations in a GUI. It supports copy, move, sync, delete, and compare workflows with in-app output and result summaries.
 
 ## Key Architecture Decisions
 - `RSyncOperation` centralizes operation metadata (labels, symbols, confirmation behavior, and destination semantics).
@@ -16,7 +16,7 @@ RSyncGUI is a macOS SwiftUI utility that wraps `rsync` operations in a GUI. It s
 
 ## Build / Run
 1. Open the project in Xcode.
-2. Select scheme `RSyncGUI`.
+2. Select scheme `rsyncGUI`.
 3. Build and run on macOS.
 
 ## Quirks / Gotchas

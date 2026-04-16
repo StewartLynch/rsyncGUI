@@ -1,6 +1,6 @@
 //
 //----------------------------------------------
-// Original project: RSyncGUI
+// Original project: rsyncGUI
 //
 // Follow me on Mastodon: https://iosdev.space/@StewartLynch
 // Follow me on Threads: https://www.threads.net/@stewartlynch

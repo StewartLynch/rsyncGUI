@@ -1,8 +1,8 @@
-# RSyncGUI — Engineering Journal
+# rsyncGUI — Engineering Journal
 
 ## The Big Picture
 
-Imagine you've been using rsync in the terminal for years — it's powerful but you always have to remember the flags. RSyncGUI is the "put a face on it" solution: a clean macOS app where you pick Copy/Move/Delete/Compare, drag your source and destination folders in, hit go, and watch the live output scroll by like a proper command-line power user — but without the command line.
+Imagine you've been using rsync in the terminal for years — it's powerful but you always have to remember the flags. rsyncGUI is the "put a face on it" solution: a clean macOS app where you pick Copy/Move/Delete/Compare, drag your source and destination folders in, hit go, and watch the live output scroll by like a proper command-line power user — but without the command line.
 
 Think of it as a cockpit for rsync. All the power, none of the typing.
 
@@ -42,8 +42,8 @@ The project has `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` set, which means eve
 ## The Codebase Map
 
 ```
-RSyncGUI/
-├── RSyncGUIApp.swift            App entry, window size/resizability
+rsyncGUI/
+├── rsyncGUIApp.swift           App entry, window size/resizability
 ├── ContentView.swift            Main UI — operation picker, paths, console, action bar
 ├── RSyncOperation.swift         Enum: Copy/Move/Delete/Compare + labels/systemImages
 ├── RSyncManager.swift           @Observable process manager — the brain
