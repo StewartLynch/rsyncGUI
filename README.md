@@ -2,6 +2,10 @@
 
 A native macOS GUI front-end for `rsync` (and `rm`), built entirely with SwiftUI and Swift Concurrency. rsyncGUI makes common file operations — copying, moving, syncing, deleting, and comparing files or folders — accessible through a clean, self-documenting interface without ever opening a Terminal window.
 
+![macOS](https://img.shields.io/badge/macOS-26%2B-blue)
+![Swift](https://img.shields.io/badge/Swift-5.0%2B-orange)
+![License](https://img.shields.io/badge/license-All%20rights%20reserved-lightgrey)
+
 ![image-20260416135543903](assets/image-20260416135543903.png)
 
 ---
