@@ -10,6 +10,9 @@ Download the latest signed installer DMG from the [GitHub Releases page](https:/
 
 Look for the release asset named **`rsyncGUI.Install.dmg`**.
 
+Direct download for the current release:
+[Download rsyncGUI.Install.dmg](https://github.com/StewartLynch/rsyncGUI/releases/download/v1.0.0/rsyncGUI.Install.dmg)
+
 ---
 
 ## Features
