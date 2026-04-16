@@ -1,4 +1,4 @@
-# RSyncMaster
+# RSyncGUI
 
 ## Project Overview
 A macOS SwiftUI app that provides a GUI frontend for rsync. Supports Copy, Move, Delete, and Compare operations with drag-and-drop path input, live console output, progress tracking, and results views.
@@ -28,7 +28,7 @@ A macOS SwiftUI app that provides a GUI frontend for rsync. Supports Copy, Move,
 
 ## Build & Run
 
-Open `RSyncMaster.xcodeproj` in Xcode 16+ and run. No external dependencies.
+Open `RSyncGUI.xcodeproj` in Xcode 16+ and run. No external dependencies.
 
 ## Entitlements
 

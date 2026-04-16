@@ -1,6 +1,6 @@
-# RSyncMaster
+# RSyncGUI
 
-A native macOS GUI front-end for `rsync` (and `rm`), built entirely with SwiftUI and Swift Concurrency. RSyncMaster makes common file operations — copying, moving, syncing, deleting, and comparing files or folders — accessible through a clean, self-documenting interface without ever opening a Terminal window.
+A native macOS GUI front-end for `rsync` (and `rm`), built entirely with SwiftUI and Swift Concurrency. RSyncGUI makes common file operations — copying, moving, syncing, deleting, and comparing files or folders — accessible through a clean, self-documenting interface without ever opening a Terminal window.
 
 ---
 
@@ -79,7 +79,7 @@ Copy, Move, Sync, and Delete all require confirmation before the operation start
 - **Xcode 16** or later
 - No Swift Package dependencies — the project builds out of the box
 
-**Recommended:** [Homebrew rsync](https://formulae.brew.sh/formula/rsync) installed at `/opt/homebrew/bin/rsync`. RSyncMaster automatically prefers it over the system-bundled rsync 2.6.9. If Homebrew rsync is not found, RSyncMaster falls back to `/usr/bin/rsync` silently.
+**Recommended:** [Homebrew rsync](https://formulae.brew.sh/formula/rsync) installed at `/opt/homebrew/bin/rsync`. RSyncGUI automatically prefers it over the system-bundled rsync 2.6.9. If Homebrew rsync is not found, RSyncGUI falls back to `/usr/bin/rsync` silently.
 
 ```
 brew install rsync
@@ -90,8 +90,8 @@ brew install rsync
 ## Building & Running
 
 1. Clone or download the repository.
-2. Open **`RSyncMaster.xcodeproj`** in Xcode 16+.
-3. Select the **RSyncMaster** scheme and your Mac as the destination.
+2. Open **`RSyncGUI.xcodeproj`** in Xcode 16+.
+3. Select the **RSyncGUI** scheme and your Mac as the destination.
 4. Press **⌘R** to build and run.
 
 ---
@@ -112,7 +112,7 @@ The **Options** row beneath the picker shows checkboxes for every flag belonging
 - **Drag** a file or folder from Finder and drop it on either field; the drop replaces the whole path.
 - Click the **…** icon button to browse with an Open Panel.
 
-> For **Sync**, both fields must be folder paths and should have matching names. RSyncMaster warns you if they differ.
+> For **Sync**, both fields must be folder paths and should have matching names. RSyncGUI warns you if they differ.
 > For **Destination / Sync Target**, Finder packages such as `.app` bundles do not count as folders.
 > For **Delete**, only the Source field is shown.
 
@@ -136,8 +136,8 @@ Click **Start [Operation]** once the paths validate. A confirmation dialog appea
 ## Architecture
 
 ```
-RSyncMaster/
-├── RSyncMasterApp.swift          App entry point (WindowGroup → ContentView)
+RSyncGUI/
+├── RSyncGUIApp.swift             App entry point (WindowGroup → ContentView)
 ├── ContentView.swift             Main window — layout and UI state coordination
 │                                 Holds the per-operation CommandFlag dictionary
 ├── PathInputView.swift           Reusable path input (type / browse / drag-drop)
@@ -173,12 +173,12 @@ RSyncMaster/
 
 The **App Sandbox is disabled** (`ENABLE_APP_SANDBOX = NO`). This is intentional:
 
-1. RSyncMaster launches external processes (`rsync`, `/bin/rm`) via `Process`.
+1. RSyncGUI launches external processes (`rsync`, `/bin/rm`) via `Process`.
 2. It must read and write arbitrary file-system paths chosen by the user.
 
 The app uses the **Hardened Runtime** and requires no additional entitlements for local use.
 
-> ⚠️ Because the sandbox is off, **RSyncMaster cannot be submitted to the Mac App Store** in this configuration. It works perfectly as a locally signed or directly run app for personal productivity.
+> ⚠️ Because the sandbox is off, **RSyncGUI cannot be submitted to the Mac App Store** in this configuration. It works perfectly as a locally signed or directly run app for personal productivity.
 
 ---
 

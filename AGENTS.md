@@ -1,7 +1,7 @@
-# RSyncMaster Agent Notes
+# RSyncGUI Agent Notes
 
 ## Project Overview
-RSyncMaster is a macOS SwiftUI utility that wraps `rsync` operations in a GUI. It supports copy, move, sync, delete, and compare workflows with in-app output and result summaries.
+RSyncGUI is a macOS SwiftUI utility that wraps `rsync` operations in a GUI. It supports copy, move, sync, delete, and compare workflows with in-app output and result summaries.
 
 ## Key Architecture Decisions
 - `RSyncOperation` centralizes operation metadata (labels, symbols, confirmation behavior, and destination semantics).
@@ -16,7 +16,7 @@ RSyncMaster is a macOS SwiftUI utility that wraps `rsync` operations in a GUI. I
 
 ## Build / Run
 1. Open the project in Xcode.
-2. Select scheme `RSyncMaster`.
+2. Select scheme `RSyncGUI`.
 3. Build and run on macOS.
 
 ## Quirks / Gotchas
